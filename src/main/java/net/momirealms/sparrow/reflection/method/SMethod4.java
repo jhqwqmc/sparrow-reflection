@@ -1,0 +1,12 @@
+package net.momirealms.sparrow.reflection.method;
+
+import org.jetbrains.annotations.Nullable;
+
+public interface SMethod4 {
+
+    Object invoke(@Nullable Object instance,
+                  @Nullable Object arg0,
+                  @Nullable Object arg1,
+                  @Nullable Object arg2,
+                  @Nullable Object arg3);
+}
