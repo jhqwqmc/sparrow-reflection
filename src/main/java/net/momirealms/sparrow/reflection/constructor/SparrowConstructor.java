@@ -1,9 +1,11 @@
 package net.momirealms.sparrow.reflection.constructor;
 
+import net.momirealms.sparrow.reflection.SReflection;
 import net.momirealms.sparrow.reflection.exception.SparrowReflectionException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.util.Objects;
 
@@ -23,6 +25,10 @@ public final class SparrowConstructor<T> {
     @Nullable
     public static <T> SparrowConstructor<T> ofNullable(@Nullable final Constructor<T> constructor) {
         return constructor == null ? null : new SparrowConstructor<T>(constructor);
+    }
+
+    public MethodHandle unreflect() {
+        return SReflection.unreflectConstructor(this.constructor);
     }
 
     public SConstructor asm() {

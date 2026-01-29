@@ -33,7 +33,7 @@ final class OptimizedMethodInvokerFactory implements Opcodes {
 
         Class<?> targetInterface = INTERFACES[parameterTypes.length];
         String suffix = targetInterface.getSimpleName().replace("SMethod", "");
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.PREFIX + "Invoker" + suffix + "_" + methodName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Invoker" + suffix + "_" + methodName + "_" + ID.getAndIncrement();
 
         byte[] bytes = generateByteCode(
                 internalClassName,

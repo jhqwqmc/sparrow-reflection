@@ -41,6 +41,64 @@ public final class SparrowClass<T> {
         return this.clazz.isInstance(object);
     }
 
+    @Nullable
+    public static Class<?> find(String... classes) {
+        for (String className : classes) {
+            Class<?> clazz = find(className);
+            if (clazz != null) {
+                return clazz;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Class<?> find(String clazz) {
+        try {
+            return Class.forName(SReflection.getRemapper().remapClassName(clazz));
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Class<?> findNoRemap(String... classes) {
+        for (String className : classes) {
+            Class<?> clazz = findNoRemap(className);
+            if (clazz != null) {
+                return clazz;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Class<?> findNoRemap(String clazz) {
+        try {
+            return Class.forName(clazz);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    public static boolean exists(String clazz) {
+        try {
+            Class.forName(SReflection.getRemapper().remapClassName(clazz));
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    public static boolean existsNoRemap(String clazz) {
+        try {
+            Class.forName(clazz);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     /*
 
     fields

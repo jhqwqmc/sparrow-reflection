@@ -24,7 +24,7 @@ final class LongFieldAccessorFactory implements Opcodes {
         Class<?> owner = field.getDeclaringClass();
         String fieldName = field.getName();
         boolean isStatic = Modifier.isStatic(field.getModifiers());
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.PREFIX + "LongAccessor_" + fieldName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "LongAccessor_" + fieldName + "_" + ID.getAndIncrement();
         byte[] bytes = generateByteCode(internalClassName, owner, fieldName, isStatic);
         MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(owner, SReflection.LOOKUP);
         MethodHandles.Lookup hiddenLookup = lookup.defineHiddenClass(bytes, true, MethodHandles.Lookup.ClassOption.NESTMATE);

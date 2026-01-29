@@ -1,14 +1,13 @@
 package net.momirealms.sparrow.reflection;
 
 import net.momirealms.sparrow.reflection.exception.SparrowReflectionException;
-import net.momirealms.sparrow.reflection.remapper.NoRemap;
 import net.momirealms.sparrow.reflection.remapper.Remapper;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -16,8 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 public final class SReflection {
-    public static String PREFIX = "Sparrow";
-    public static Remapper REMAPPER = NoRemap.INSTANCE;
+    private static final String YOU_SHOULD_RELOCATE_THIS = "net{}momirealms{}sparrow{}reflection";
     public static final Unsafe UNSAFE;
     public static final MethodHandles.Lookup LOOKUP;
     private static final MethodHandle method$MethodHandleNatives$refKindIsSetter;
@@ -31,6 +29,7 @@ public final class SReflection {
 
     static {
         try {
+            checkRelocation();
             Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             unsafeField.setAccessible(true);
             UNSAFE = (Unsafe) unsafeField.get(null);
@@ -55,74 +54,34 @@ public final class SReflection {
         }
     }
 
+    @SuppressWarnings("all")
+    private static void checkRelocation() {
+        if (SReflection.class.getName().startsWith(YOU_SHOULD_RELOCATE_THIS.replace("{}", "."))) {
+            throw new SparrowReflectionException("You should relocate sparrow reflection");
+        }
+    }
+
+    private static String PREFIX = "Sparrow";
+    private static Remapper REMAPPER = Remapper.noOp();
+
     private SReflection() {}
 
-    public static void setAsmClassPrefix(String prefix) {
-        SReflection.PREFIX = prefix;
+    public static void setAsmClassPrefix(@NotNull String prefix) {
+        SReflection.PREFIX = Objects.requireNonNull(prefix);
     }
 
-    public static void setRemapper(Remapper remapper) {
-        SReflection.REMAPPER = remapper;
+    public static void setRemapper(@NotNull Remapper remapper) {
+        SReflection.REMAPPER = Objects.requireNonNull(remapper);
     }
 
-    @Nullable
-    public static Class<?> find(String... classes) {
-        for (String className : classes) {
-            Class<?> clazz = find(className);
-            if (clazz != null) {
-                return clazz;
-            }
-        }
-        return null;
+    @NotNull
+    public static Remapper getRemapper() {
+        return SReflection.REMAPPER;
     }
 
-    @Nullable
-    public static Class<?> find(ClassLoader classLoader, String... classes) {
-        for (String className : classes) {
-            Class<?> clazz = find(classLoader, true, className);
-            if (clazz != null) {
-                return clazz;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    public static Class<?> find(ClassLoader classLoader, boolean initialize, String... classes) {
-        for (String className : classes) {
-            Class<?> clazz = find(classLoader, initialize, className);
-            if (clazz != null) {
-                return clazz;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    public static Class<?> find(String clazz) {
-        try {
-            return Class.forName(clazz);
-        } catch (Throwable e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    public static Class<?> find(ClassLoader classLoader, boolean initialize, String clazz) {
-        try {
-            return Class.forName(clazz, initialize, classLoader);
-        } catch (Throwable e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    public static Class<?> find(ClassLoader classLoader, String clazz) {
-        try {
-            return Class.forName(clazz, true, classLoader);
-        } catch (Throwable e) {
-            return null;
-        }
+    @NotNull
+    public static String getAsmClassPrefix() {
+        return SReflection.PREFIX;
     }
 
     @NotNull
@@ -131,7 +90,15 @@ public final class SReflection {
         return o;
     }
 
-    public static MethodHandle unreflectSetter(@NotNull Field field) {
+    public static VarHandle unreflectVarHandle(@NotNull final Field field) {
+        try {
+            return LOOKUP.unreflectVarHandle(field);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
+    public static MethodHandle unreflectSetter(@NotNull final Field field) {
         try {
             return LOOKUP.unreflectSetter(field);
         } catch (IllegalAccessException e) {
@@ -146,7 +113,7 @@ public final class SReflection {
         }
     }
 
-    public static MethodHandle unreflectGetter(Field field) {
+    public static MethodHandle unreflectGetter(@NotNull final Field field) {
         try {
             return LOOKUP.unreflectGetter(field);
         } catch (IllegalAccessException e) {
@@ -154,7 +121,7 @@ public final class SReflection {
         }
     }
 
-    public static MethodHandle unreflectConstructor(Constructor<?> constructor) {
+    public static MethodHandle unreflectConstructor(@NotNull final Constructor<?> constructor) {
         try {
             return LOOKUP.unreflectConstructor(constructor);
         } catch (IllegalAccessException e) {
@@ -162,7 +129,7 @@ public final class SReflection {
         }
     }
 
-    public static MethodHandle unreflectMethod(Method method) {
+    public static MethodHandle unreflectMethod(@NotNull final Method method) {
         try {
             return LOOKUP.unreflect(method);
         } catch (IllegalAccessException e) {
@@ -170,7 +137,7 @@ public final class SReflection {
         }
     }
 
-    public static Class<?> defineClass(MethodHandles.Lookup lookup, byte[] bytes) throws Throwable {
+    public static Class<?> defineClass(@NotNull final MethodHandles.Lookup lookup, final byte[] bytes) throws Throwable {
         Object classFile = methodHandle$ClassFile$readClassFile.invoke(bytes);
         Object classDefiner = constructor$ClassDefiner.invoke(lookup, classFile, /* STRONG_LOADER_LINK */ 4, instance$defaultDumper);
         return (Class<?>) method$ClassDefiner$defineClass.invoke(classDefiner, true);

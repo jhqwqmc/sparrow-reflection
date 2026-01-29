@@ -28,7 +28,7 @@ final class OptimizedConstructorInvokerFactory implements Opcodes {
         Class<?>[] parameterTypes = constructor.getParameterTypes();
 
         Class<?> targetAbstractClass = ABSTRACT_CLASSES[parameterTypes.length];
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.PREFIX + "ConstructorInvoker" + parameterTypes.length + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "ConstructorInvoker" + parameterTypes.length + "_" + ID.getAndIncrement();
 
         byte[] bytes = generateByteCode(
                 internalClassName,

@@ -1,9 +1,12 @@
 package net.momirealms.sparrow.reflection.field;
 
+import net.momirealms.sparrow.reflection.SReflection;
 import net.momirealms.sparrow.reflection.exception.SparrowReflectionException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
@@ -25,6 +28,18 @@ public final class SparrowField {
 
     public Field field() {
         return field;
+    }
+
+    public MethodHandle unreflectGetter() {
+        return SReflection.unreflectGetter(this.field);
+    }
+
+    public MethodHandle unreflectSetter() {
+        return SReflection.unreflectSetter(this.field);
+    }
+
+    public VarHandle unreflectVarHandle() {
+        return SReflection.unreflectVarHandle(this.field);
     }
 
     public SField mh() {

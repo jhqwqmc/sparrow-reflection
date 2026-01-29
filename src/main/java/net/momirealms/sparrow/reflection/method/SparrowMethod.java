@@ -1,9 +1,11 @@
 package net.momirealms.sparrow.reflection.method;
 
+import net.momirealms.sparrow.reflection.SReflection;
 import net.momirealms.sparrow.reflection.exception.SparrowReflectionException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -21,6 +23,10 @@ public final class SparrowMethod {
 
     public static SparrowMethod ofNullable(@Nullable final Method method) {
         return method == null ? null : new SparrowMethod(method);
+    }
+
+    public MethodHandle unreflect() {
+        return SReflection.unreflectMethod(this.method);
     }
 
     public SMethod asm() {

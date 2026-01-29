@@ -23,11 +23,19 @@ public interface FieldMatchers {
     }
 
     static FieldMatcher named(String name) {
-        return new NameMatcher(name);
+        return new NameMatcher(name, true);
+    }
+
+    static FieldMatcher namedNoRemap(String name) {
+        return new NameMatcher(name, false);
     }
 
     static FieldMatcher named(String... names) {
-        return new NamesMatcher(names);
+        return new NamesMatcher(names, true);
+    }
+
+    static FieldMatcher namedNoRemap(String... names) {
+        return new NamesMatcher(names, false);
     }
 
     static FieldMatcher type(Class<?> clazz) {

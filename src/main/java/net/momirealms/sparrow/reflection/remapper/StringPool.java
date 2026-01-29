@@ -1,12 +1,12 @@
-package net.momirealms.sparrow.reflection.util;
+package net.momirealms.sparrow.reflection.remapper;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public final class StringPool {
+final class StringPool {
     private final Map<String, String> map;
 
-    public StringPool(Map<String, String> map) {
+    StringPool(Map<String, String> map) {
         this.map = map;
     }
 

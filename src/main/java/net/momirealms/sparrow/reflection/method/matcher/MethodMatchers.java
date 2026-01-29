@@ -25,11 +25,19 @@ public interface MethodMatchers {
     }
 
     static MethodMatcher named(String name) {
-        return new NameMatcher(name);
+        return new NameMatcher(name, true);
+    }
+
+    static MethodMatcher namedNoRemap(String name) {
+        return new NameMatcher(name, false);
     }
 
     static MethodMatcher named(String... names) {
-        return new NamesMatcher(names);
+        return new NamesMatcher(names, true);
+    }
+
+    static MethodMatcher namedNoRemap(String... names) {
+        return new NamesMatcher(names, false);
     }
 
     static MethodMatcher returnType(final Class<?> type) {

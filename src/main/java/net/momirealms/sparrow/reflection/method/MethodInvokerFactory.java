@@ -26,7 +26,7 @@ final class MethodInvokerFactory implements Opcodes {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Class<?> returnType = method.getReturnType();
 
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.PREFIX + "Invoker_" + methodName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Invoker_" + methodName + "_" + ID.getAndIncrement();
 
         byte[] bytes = generateByteCode(internalClassName, owner, methodName, methodDescriptor, isStatic, parameterTypes, returnType);
 
@@ -56,7 +56,6 @@ final class MethodInvokerFactory implements Opcodes {
             mv.visitTypeInsn(CHECKCAST, Type.getInternalName(owner));
         }
 
-        // 处理可变参数数组 (Object[] args)
         for (int i = 0; i < params.length; i++) {
             mv.visitVarInsn(ALOAD, 2);
             AsmUtils.pushInt(mv, i);
@@ -64,15 +63,12 @@ final class MethodInvokerFactory implements Opcodes {
             AsmUtils.unboxAndCast(mv, Type.getDescriptor(params[i]));
         }
 
-        // 决定调用指令
         int opcode = isStatic ? INVOKESTATIC : (owner.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL);
         mv.visitMethodInsn(opcode, Type.getInternalName(owner), methodName, methodDescriptor, owner.isInterface());
 
-        // D. 处理返回值
         if (returnType == void.class) {
             mv.visitInsn(ACONST_NULL);
         } else {
-            // 将基本类型包装为 Object (e.g., int -> Integer)
             AsmUtils.box(mv, Type.getDescriptor(returnType));
         }
 

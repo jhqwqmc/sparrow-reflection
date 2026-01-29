@@ -1,7 +1,8 @@
 package net.momirealms.sparrow.reflection.remapper;
 
-public class NoRemap implements Remapper {
+final class NoRemap implements Remapper {
     public static final NoRemap INSTANCE = new NoRemap();
+    private NoRemap() {}
 
     @Override
     public String remapClassName(String className) {
@@ -16,5 +17,15 @@ public class NoRemap implements Remapper {
     @Override
     public String remapMethodName(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         return methodName;
+    }
+
+    @Override
+    public String remapClassOrArrayName(String clazzOrArrayName) {
+        return clazzOrArrayName;
+    }
+
+    @Override
+    public boolean isNoOp() {
+        return true;
     }
 }

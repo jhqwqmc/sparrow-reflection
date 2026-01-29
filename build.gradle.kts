@@ -1,38 +1,49 @@
 plugins {
     id("java")
+    id("com.gradleup.shadow") version "9.3.0"
     id("maven-publish")
 }
 
 repositories {
     mavenCentral()
+    maven("https://maven.fabricmc.net/")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 group = "net.momirealms"
 version = "0.2"
 
 dependencies {
-    implementation("org.ow2.asm:asm:9.9")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("org.ow2.asm:asm:9.9")
     compileOnly("org.jetbrains:annotations:26.0.2-1")
-//    testImplementation(platform("org.junit:junit-bom:6.1.0-M1"))
-//    testImplementation("org.junit.jupiter:junit-jupiter")
+    compileOnly("net.fabricmc:mapping-io:0.8.0")
 }
-
-//tasks.test {
-//    useJUnitPlatform()
-//    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
-//}
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(21)
     dependsOn(tasks.clean)
+}
+
+artifacts {
+    implementation(tasks.shadowJar)
+}
+
+tasks {
+    shadowJar {
+        archiveClassifier = ""
+        archiveFileName = "sparrow-reflection-${project.version}.jar"
+        relocate("net.kyori", "net.momirealms.craftengine.libraries")
+        destinationDirectory.set(file("$rootDir/target"))
+    }
 }
 
 publishing {
