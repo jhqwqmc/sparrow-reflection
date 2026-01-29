@@ -28,6 +28,10 @@ public interface FieldMatcher {
         return new NamesMatcher(names);
     }
 
+    static FieldMatcher type(Class<?> type) {
+        return new TypeMatcher(type);
+    }
+
     static FieldMatcher privateMethod() {
         return PrivateMatcher.INSTANCE;
     }
