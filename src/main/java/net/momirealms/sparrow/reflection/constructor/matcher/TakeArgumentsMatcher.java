@@ -12,6 +12,7 @@ final class TakeArgumentsMatcher implements ConstructorMatcher {
     @Override
     public boolean matches(Constructor<?> constructor) {
         Class<?>[] params = constructor.getParameterTypes();
+        if (params.length != arguments.length) return false;
         for (int i = 0; i < this.arguments.length; i++) {
             if (this.arguments[i] != params[i])
                 return false;

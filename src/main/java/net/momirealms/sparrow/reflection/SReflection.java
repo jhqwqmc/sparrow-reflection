@@ -57,7 +57,7 @@ public final class SReflection {
 
     private SReflection() {}
 
-    public static void setPrefix(String prefix) {
+    public static void setAsmClassPrefix(String prefix) {
         SReflection.PREFIX = prefix;
     }
 
