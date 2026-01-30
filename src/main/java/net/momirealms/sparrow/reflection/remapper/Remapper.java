@@ -1,7 +1,6 @@
 package net.momirealms.sparrow.reflection.remapper;
 
 import net.momirealms.sparrow.reflection.clazz.SparrowClass;
-import org.bukkit.Bukkit;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -9,6 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 
 public interface Remapper {
 
@@ -35,7 +35,14 @@ public interface Remapper {
         if (SparrowClass.existsNoRemap("net.neoforged.art.internal.RenamerImpl")) {
             return noOp();
         }
-        try (InputStream is = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/mappings/reobf.tiny")) {
+        Class<?> minecraftClass = SparrowClass.find(
+                "net.minecraft.obfuscate.DontObfuscate",
+                "net.minecraft.server.Main"
+        );
+        if (minecraftClass == null) {
+            return noOp();
+        }
+        try (InputStream is = minecraftClass.getClassLoader().getResourceAsStream("META-INF/mappings/reobf.tiny")) {
             if (is == null) {
                 throw new IllegalStateException("Failed to find META-INF/mappings/reobf.tiny");
             }

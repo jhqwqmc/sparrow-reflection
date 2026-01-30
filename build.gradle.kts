@@ -7,15 +7,13 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://maven.fabricmc.net/")
-    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 group = "net.momirealms"
-version = "0.3"
+version = "0.5"
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    implementation("org.ow2.asm:asm:9.9")
+    compileOnly("org.ow2.asm:asm:9.9")
     compileOnly("org.jetbrains:annotations:26.0.2-1")
     implementation("net.fabricmc:mapping-io:0.8.0")
 }
