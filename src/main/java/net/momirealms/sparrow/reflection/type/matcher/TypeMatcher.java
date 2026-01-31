@@ -34,7 +34,7 @@ public interface TypeMatcher {
         return not(anyOf(matchers));
     }
 
-    static TypeMatcher parameterized(final TypeMatcher raw, TypeMatcher... parameters) {
+    static TypeMatcher parameterized(final TypeMatcher raw, TypeMatcher[] parameters) {
         return new ParameterizedMatcher(raw, null, parameters);
     }
 
