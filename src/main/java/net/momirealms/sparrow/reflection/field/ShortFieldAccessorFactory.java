@@ -9,12 +9,10 @@ import org.objectweb.asm.Type;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("DuplicatedCode")
 final class ShortFieldAccessorFactory implements Opcodes {
     private ShortFieldAccessorFactory() {}
-    private static final AtomicInteger ID = new AtomicInteger(0);
     private static final String ABSTRACT_CLASS_INTERNAL_NAME = Type.getInternalName(SShortField.class);
 
     static SShortField create(Field field) throws Exception {
@@ -25,7 +23,7 @@ final class ShortFieldAccessorFactory implements Opcodes {
         String fieldName = field.getName();
         boolean isStatic = Modifier.isStatic(field.getModifiers());
 
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "ShortAccessor_" + fieldName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Field_" + fieldName;
 
         byte[] bytes = generateByteCode(internalClassName, owner, fieldName, isStatic);
 

@@ -9,19 +9,17 @@ import org.objectweb.asm.Type;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("DuplicatedCode")
 final class ConstructorInvokerFactory implements Opcodes {
     private ConstructorInvokerFactory() {}
-    private static final AtomicInteger ID = new AtomicInteger(0);
     private static final String ABSTRACT_CLASS_INTERNAL_NAME = Type.getInternalName(SConstructor.class);
 
     static SConstructor create(Constructor<?> constructor) throws Exception {
         Class<?> owner = constructor.getDeclaringClass();
         String constructorDescriptor = Type.getConstructorDescriptor(constructor);
         Class<?>[] parameterTypes = constructor.getParameterTypes();
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "SConstructor_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Constructor";
         byte[] bytes = generateByteCode(internalClassName, owner, constructorDescriptor, parameterTypes);
         MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(owner, SReflection.LOOKUP);
         MethodHandles.Lookup hiddenLookup = lookup.defineHiddenClass(bytes, true, MethodHandles.Lookup.ClassOption.NESTMATE);

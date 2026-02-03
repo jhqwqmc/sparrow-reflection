@@ -10,12 +10,10 @@ import org.objectweb.asm.Type;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("DuplicatedCode")
 final class MethodInvokerFactory implements Opcodes {
     private MethodInvokerFactory() {}
-    private static final AtomicInteger ID = new AtomicInteger(0);
     private static final String SUPER_NAME = Type.getInternalName(SMethod.class);
 
     static SMethod create(Method method) throws Exception {
@@ -26,7 +24,7 @@ final class MethodInvokerFactory implements Opcodes {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Class<?> returnType = method.getReturnType();
 
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Invoker_" + methodName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Method_" + methodName;
 
         byte[] bytes = generateByteCode(internalClassName, owner, methodName, methodDescriptor, isStatic, parameterTypes, returnType);
 

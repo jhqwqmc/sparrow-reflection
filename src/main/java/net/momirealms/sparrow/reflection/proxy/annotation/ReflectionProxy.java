@@ -17,5 +17,5 @@ public @interface ReflectionProxy {
 
     boolean ignoreRelocation() default false;
 
-    String version() default "";
+    String condition() default "";
 }

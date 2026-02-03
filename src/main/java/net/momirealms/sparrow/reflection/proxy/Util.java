@@ -2,13 +2,14 @@ package net.momirealms.sparrow.reflection.proxy;
 
 import net.momirealms.sparrow.reflection.SReflection;
 import net.momirealms.sparrow.reflection.clazz.SparrowClass;
+import net.momirealms.sparrow.reflection.constructor.matcher.ConstructorMatcher;
 import net.momirealms.sparrow.reflection.field.matcher.FieldMatcher;
 import net.momirealms.sparrow.reflection.method.matcher.MethodMatcher;
 import net.momirealms.sparrow.reflection.proxy.annotation.*;
+import net.momirealms.sparrow.reflection.proxy.annotation.Type;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 
 final class Util {
@@ -36,7 +37,7 @@ final class Util {
         if (proxy == null) {
             throw new IllegalArgumentException("Class " + clazz + " has no @ReflectionProxy annotation");
         }
-        if (SReflection.getVersionMatcher().test(proxy.version())) {
+        if (SReflection.getCustomCondition().test(proxy.condition())) {
             return Objects.requireNonNull(getProxiedClass(clazz, proxy), "Cannot find proxied class for " + clazz);
         } else {
             return null;
@@ -111,6 +112,8 @@ final class Util {
         }
         if (fieldGetter.isStatic()) {
             matcher.and(FieldMatcher.staticField());
+        } else {
+            matcher.and(FieldMatcher.instanceField());
         }
         return matcher;
     }
@@ -127,6 +130,8 @@ final class Util {
         }
         if (fieldSetter.isStatic()) {
             matcher.and(FieldMatcher.staticField());
+        } else {
+            matcher.and(FieldMatcher.instanceField());
         }
         return matcher;
     }
@@ -142,7 +147,79 @@ final class Util {
         }
         if (invoker.isStatic()) {
             matcher.and(MethodMatcher.staticMethod());
+        } else {
+            matcher.and(MethodMatcher.instanceMethod());
         }
         return matcher;
+    }
+
+    public static void analyseAndApply(ProxyBuilder builder, List<Class<?>> interfaces) {
+        for (Class<?> proxyClass : interfaces) {
+            Class<?> targetClazz = Util.getProxiedClass(proxyClass);
+            // 版本原因找不到类
+            if (targetClazz == null) {
+                continue;
+            }
+            analyseAndApply(proxyClass, targetClazz, builder);
+        }
+    }
+
+    private static void analyseAndApply(Class<?> proxyClass, Class<?> targetClass, ProxyBuilder builder) {
+        SparrowClass<?> spaClass = new SparrowClass<>(targetClass);
+        for (Method method : proxyClass.getDeclaredMethods()) {
+
+            // 字段获取
+            FieldGetter fieldGetter = method.getAnnotation(FieldGetter.class);
+            if (fieldGetter != null && SReflection.getCustomCondition().test(fieldGetter.condition())) {
+                // 字段只需 名称 即可确定
+                Field field = spaClass.getDeclaredField(Util.getFieldMatcher(fieldGetter));
+                Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
+                Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 0 : 1);
+                builder.writeFieldGetter(method, field);
+                continue;
+            }
+
+            // 字段设置
+            FieldSetter fieldSetter = method.getAnnotation(FieldSetter.class);
+            if (fieldSetter != null && SReflection.getCustomCondition().test(fieldSetter.condition())) {
+                Field field = spaClass.getDeclaredField(Util.getFieldMatcher(fieldSetter));
+                Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
+                Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 1 : 2);
+                builder.writeFieldSetter(method, field);
+                continue;
+            }
+
+            // 方法调用
+            MethodInvoker methodInvoker = method.getAnnotation(MethodInvoker.class);
+            if (methodInvoker != null && SReflection.getCustomCondition().test(methodInvoker.condition())) {
+                Class<?>[] parameterTypes = Arrays.stream(method.getParameters())
+                        .skip(methodInvoker.isStatic() ? 0 : 1)
+                        .map(Util::getParameterClass)
+                        .toArray(Class<?>[]::new);
+                // 方法只需要 参数 + 名称，即可确定唯一方法
+                Method targetMethod = spaClass.getDeclaredMethod(Util.createMethodMatcher(methodInvoker).and(MethodMatcher.takeArguments(parameterTypes)));
+                Objects.requireNonNull(targetMethod, "Method not found for proxy " + proxyClass + "#" + method.getName());
+                if (!Modifier.isStatic(targetMethod.getModifiers())) {
+                    if (method.getParameterCount() < 1) {
+                        throw new IllegalArgumentException("Non-static method must have at least one argument");
+                    }
+                }
+                builder.writeMethod(method, targetMethod);
+                continue;
+            }
+
+            // 构造器
+            ConstructorInvoker constructorInvoker = method.getAnnotation(ConstructorInvoker.class);
+            if (constructorInvoker != null && SReflection.getCustomCondition().test(constructorInvoker.condition())) {
+                // 构造器只需要 参数 即可确定
+                Class<?>[] parameterTypes = Arrays.stream(method.getParameters())
+                        .map(Util::getParameterClass)
+                        .toArray(Class<?>[]::new);
+                Constructor<?> constructor = spaClass.getDeclaredConstructor(ConstructorMatcher.takeArguments(parameterTypes));
+                Objects.requireNonNull(constructor, "Constructor not found for proxy " + proxyClass + "#" + method.getName());
+                builder.writeConstructor(method, constructor);
+                continue;
+            }
+        }
     }
 }

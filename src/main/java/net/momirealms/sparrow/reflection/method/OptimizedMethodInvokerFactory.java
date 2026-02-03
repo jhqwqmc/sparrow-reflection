@@ -10,12 +10,10 @@ import org.objectweb.asm.Type;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("DuplicatedCode")
 final class OptimizedMethodInvokerFactory implements Opcodes {
     private OptimizedMethodInvokerFactory() {}
-    private static final AtomicInteger ID = new AtomicInteger(0);
     private static final Class<?>[] INTERFACES = new Class<?>[]{
             SMethod0.class, SMethod1.class, SMethod2.class, SMethod3.class,
             SMethod4.class, SMethod5.class, SMethod6.class, SMethod7.class,
@@ -30,10 +28,8 @@ final class OptimizedMethodInvokerFactory implements Opcodes {
         boolean isStatic = Modifier.isStatic(method.getModifiers());
         Class<?>[] parameterTypes = method.getParameterTypes();
         Class<?> returnType = method.getReturnType();
-
         Class<?> targetInterface = INTERFACES[parameterTypes.length];
-        String suffix = targetInterface.getSimpleName().replace("SMethod", "");
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Invoker" + suffix + "_" + methodName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Method_" + methodName;
 
         byte[] bytes = generateByteCode(
                 internalClassName,

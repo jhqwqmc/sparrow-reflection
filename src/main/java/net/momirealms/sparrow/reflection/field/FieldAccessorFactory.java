@@ -9,12 +9,10 @@ import org.objectweb.asm.Type;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("DuplicatedCode")
 final class FieldAccessorFactory implements Opcodes {
     private FieldAccessorFactory() {}
-    private static final AtomicInteger ID = new AtomicInteger(0);
     private static final String ABSTRACT_CLASS_INTERNAL_NAME = Type.getInternalName(SField.class);
 
     static SField create(java.lang.reflect.Field field) throws Exception {
@@ -22,7 +20,7 @@ final class FieldAccessorFactory implements Opcodes {
         String fieldName = field.getName();
         String fieldDescriptor = Type.getDescriptor(field.getType());
         boolean isStatic = Modifier.isStatic(field.getModifiers());
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Accessor_" + fieldName + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Field_" + fieldName;
         byte[] bytes = generateByteCode(internalClassName, owner, fieldName, fieldDescriptor, isStatic);
         MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(owner, SReflection.LOOKUP);
         MethodHandles.Lookup hiddenLookup = lookup.defineHiddenClass(bytes, true, MethodHandles.Lookup.ClassOption.NESTMATE);

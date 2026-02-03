@@ -2,7 +2,6 @@ package net.momirealms.sparrow.reflection;
 
 import net.momirealms.sparrow.reflection.exception.SparrowReflectionException;
 import net.momirealms.sparrow.reflection.remapper.Remapper;
-import net.momirealms.sparrow.reflection.util.VersionPredicate;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
@@ -14,7 +13,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public final class SReflection {
@@ -69,7 +67,7 @@ public final class SReflection {
 
     private static String PREFIX = "Sparrow";
     private static Remapper REMAPPER = Remapper.noOp();
-    private static VersionPredicate VERSION_MATCHER = s -> true;
+    private static Predicate<String> CONDITION = s -> true;
 
     private SReflection() {}
 
@@ -81,8 +79,8 @@ public final class SReflection {
         SReflection.REMAPPER = Objects.requireNonNull(remapper);
     }
 
-    public static void setVersionMatcher(@NotNull VersionPredicate versionMatcher) {
-        SReflection.VERSION_MATCHER = Objects.requireNonNull(versionMatcher);
+    public static void setCondition(@NotNull Predicate<String> condition) {
+        SReflection.CONDITION = Objects.requireNonNull(condition);
     }
 
     @NotNull
@@ -96,8 +94,8 @@ public final class SReflection {
     }
 
     @NotNull
-    public static VersionPredicate getVersionMatcher() {
-        return SReflection.VERSION_MATCHER;
+    public static Predicate<String> getCustomCondition() {
+        return SReflection.CONDITION;
     }
 
     @NotNull

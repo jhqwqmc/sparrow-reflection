@@ -91,11 +91,9 @@ public final class Example {
 
 ### 反射代理
 
-**目前存在的缺陷：**
-- ProxyFactory.newJavaProxy 当前基于Java代理实现，底层使用ASM生成机制，但由于代理机制限制，每次调用相比原生方法需额外增加一次HashMap查找和数组参数转换开销，执行效率显著低于直接调用。
-- ProxyFactory.newAsmProxy 尚未实现，其目标是直接生成高度优化的代理类，通过为每个方法生成最优化的字节码来彻底消除额外开销，实现接近原生的执行性能。
+反射代理基于 asm 生成类机制实现，其性能与原生调用近似。
 
-以下是一些测试用数据类
+以下是一些测试用数据类。
 
 ```java
 package net.momirealms.sparrow.reflection;
@@ -120,8 +118,8 @@ import java.util.UUID;
 
 public class ServerPlayer extends Player {
     private final UUID uuid;
-    private final String name;
-    private final ServerLevel level;
+    private String name;
+    private ServerLevel level;
 
     public ServerPlayer(UUID uuid, String name, ServerLevel level) {
         this.uuid = uuid;
@@ -169,8 +167,7 @@ public class ServerLevel {
 ```java
 package net.momirealms.sparrow.reflection;
 
-import net.momirealms.sparrow.reflection.proxy.ProxyFactory;
-import net.momirealms.sparrow.reflection.proxy.Strategy;
+import net.momirealms.sparrow.reflection.proxy.ASMProxyFactory;
 import net.momirealms.sparrow.reflection.proxy.annotation.*;
 
 import java.util.UUID;
@@ -178,18 +175,16 @@ import java.util.UUID;
 public class ProxyExample {
 
     public static void main(String[] args) {
-        // 创建代理工厂
-        ProxyFactory proxyFactory = ProxyFactory.create(ProxyExample.class.getClassLoader());
         // 假设存在已有对象
         ServerLevel serverLevel = new ServerLevel(666);
-        
+
         // 创建 ServerLevelProxy 并通过代理接口设置世界时间
-        ServerLevelProxy serverLevelProxy = proxyFactory.newJavaProxy(ServerLevelProxy.class);
+        ServerLevelProxy serverLevelProxy = ASMProxyFactory.create(ServerLevelProxy.class);
         int previous = serverLevelProxy.setTime(serverLevel, 100);
         System.out.println(previous);
 
         // 创建 ServerPlayerProxy 并调用其构造器
-        ServerPlayerProxy serverPlayerProxy = proxyFactory.newJavaProxy(ServerPlayerProxy.class);
+        ServerPlayerProxy serverPlayerProxy = ASMProxyFactory.create(ServerPlayerProxy.class);
         Object serverPlayer = serverPlayerProxy.newInstance(UUID.randomUUID(), "XiaoMoMi", serverLevel);
         // 调用父类方法
         serverPlayerProxy.sayHello(serverPlayer);
@@ -197,7 +192,7 @@ public class ProxyExample {
         serverPlayerProxy.getRandomString(100);
         // 调用方法
         System.out.println(serverPlayerProxy.getUUID(serverPlayer));
-        // 修改私有字段
+        // 无视 final 修改私有字段
         serverPlayerProxy.setUUID(serverPlayer, UUID.randomUUID());
         System.out.println(serverPlayerProxy.getUUID(serverPlayer));
     }
@@ -219,10 +214,10 @@ public class ProxyExample {
         @ConstructorInvoker
         Object newInstance(UUID uuid, String name, @Type(clazz = ServerLevelProxy.class) Object level /* 对于不可访问的类使用 Type 注解 */);
 
-        @FieldSetter(name = "uuid", strategy = Strategy.MH, version = "1.20.1~1.20.4")
+        @FieldSetter(name = "uuid")
         void setUUID(Object player, UUID uuid);
 
-        @FieldGetter(name = "uuid", version = ">=1.21.2")
+        @FieldGetter(name = "uuid")
         UUID getUUID(Object player);
     }
 

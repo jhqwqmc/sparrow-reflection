@@ -9,12 +9,10 @@ import org.objectweb.asm.Type;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("DuplicatedCode")
 final class OptimizedConstructorInvokerFactory implements Opcodes {
     private OptimizedConstructorInvokerFactory() {}
-    private static final AtomicInteger ID = new AtomicInteger(0);
     private static final Class<?>[] ABSTRACT_CLASSES = new Class<?>[]{
             SConstructor0.class, SConstructor1.class, SConstructor2.class, SConstructor3.class,
             SConstructor4.class, SConstructor5.class, SConstructor6.class, SConstructor7.class,
@@ -28,7 +26,7 @@ final class OptimizedConstructorInvokerFactory implements Opcodes {
         Class<?>[] parameterTypes = constructor.getParameterTypes();
 
         Class<?> targetAbstractClass = ABSTRACT_CLASSES[parameterTypes.length];
-        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "ConstructorInvoker" + parameterTypes.length + "_" + ID.getAndIncrement();
+        String internalClassName = Type.getInternalName(owner) + "$" + SReflection.getAsmClassPrefix() + "Constructor";
 
         byte[] bytes = generateByteCode(
                 internalClassName,

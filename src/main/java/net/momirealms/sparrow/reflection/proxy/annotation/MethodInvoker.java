@@ -15,5 +15,5 @@ public @interface MethodInvoker {
 
     boolean isStatic() default false;
 
-    String version() default "";
+    String condition() default "";
 }
