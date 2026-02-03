@@ -95,15 +95,21 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
             mv.visitTypeInsn(CHECKCAST, owner);
         }
 
-        mv.visitVarInsn(ALOAD, valueParamIndex);
+        Class<?> proxyParamType = method.getParameterTypes()[valueParamIndex - 1];
+        Type asmProxyParamType = Type.getType(proxyParamType);
+        mv.visitVarInsn(asmProxyParamType.getOpcode(ILOAD), valueParamIndex);
 
         if (fieldType.isPrimitive()) {
-            try {
+            if (!proxyParamType.isPrimitive()) {
                 AsmUtils.unboxAndCast(mv, fieldDescriptor);
-            } catch (IllegalArgumentException e) {
+            } else if (proxyParamType != field.getType()) {
                 throw new IllegalArgumentException(String.format(
-                        "Cannot unbox value to field '%s' (%s) in method '%s'",
-                        field.getName(), fieldType.getSimpleName(), method.getName()), e);
+                        "Primitive type mismatch in method '%s': cannot pass '%s' to field '%s' of type '%s' without explicit conversion",
+                        method.getName(),
+                        proxyParamType.getSimpleName(),
+                        field.getName(),
+                        field.getType().getSimpleName()
+                ));
             }
         } else {
             mv.visitTypeInsn(CHECKCAST, Type.getInternalName(fieldType));
