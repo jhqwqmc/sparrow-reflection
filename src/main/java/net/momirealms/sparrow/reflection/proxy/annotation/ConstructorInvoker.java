@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConstructorInvoker {
 
-    String condition() default "";
+    String activeIf() default "";
 }

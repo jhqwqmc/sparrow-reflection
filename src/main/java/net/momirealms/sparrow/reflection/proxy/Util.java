@@ -37,7 +37,7 @@ final class Util {
         if (proxy == null) {
             throw new IllegalArgumentException("Class " + clazz + " has no @ReflectionProxy annotation");
         }
-        if (SReflection.getCustomCondition().test(proxy.condition())) {
+        if (SReflection.getFilter().test(proxy.activeIf())) {
             return Objects.requireNonNull(getProxiedClass(clazz, proxy), "Cannot find proxied class for " + clazz);
         } else {
             return null;
@@ -170,7 +170,7 @@ final class Util {
 
             // 字段获取
             FieldGetter fieldGetter = method.getAnnotation(FieldGetter.class);
-            if (fieldGetter != null && SReflection.getCustomCondition().test(fieldGetter.condition())) {
+            if (fieldGetter != null && SReflection.getFilter().test(fieldGetter.activeIf())) {
                 // 字段只需 名称 即可确定
                 Field field = spaClass.getDeclaredField(Util.getFieldMatcher(fieldGetter));
                 Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
@@ -181,7 +181,7 @@ final class Util {
 
             // 字段设置
             FieldSetter fieldSetter = method.getAnnotation(FieldSetter.class);
-            if (fieldSetter != null && SReflection.getCustomCondition().test(fieldSetter.condition())) {
+            if (fieldSetter != null && SReflection.getFilter().test(fieldSetter.activeIf())) {
                 Field field = spaClass.getDeclaredField(Util.getFieldMatcher(fieldSetter));
                 Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
                 Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 1 : 2);
@@ -191,7 +191,7 @@ final class Util {
 
             // 方法调用
             MethodInvoker methodInvoker = method.getAnnotation(MethodInvoker.class);
-            if (methodInvoker != null && SReflection.getCustomCondition().test(methodInvoker.condition())) {
+            if (methodInvoker != null && SReflection.getFilter().test(methodInvoker.activeIf())) {
                 Class<?>[] parameterTypes = Arrays.stream(method.getParameters())
                         .skip(methodInvoker.isStatic() ? 0 : 1)
                         .map(Util::getParameterClass)
@@ -210,7 +210,7 @@ final class Util {
 
             // 构造器
             ConstructorInvoker constructorInvoker = method.getAnnotation(ConstructorInvoker.class);
-            if (constructorInvoker != null && SReflection.getCustomCondition().test(constructorInvoker.condition())) {
+            if (constructorInvoker != null && SReflection.getFilter().test(constructorInvoker.activeIf())) {
                 // 构造器只需要 参数 即可确定
                 Class<?>[] parameterTypes = Arrays.stream(method.getParameters())
                         .map(Util::getParameterClass)

@@ -67,7 +67,7 @@ public final class SReflection {
 
     private static String PREFIX = "Sparrow";
     private static Remapper REMAPPER = Remapper.noOp();
-    private static Predicate<String> CONDITION = s -> true;
+    private static Predicate<String> ACTIVE_PREDICATE = s -> true;
 
     private SReflection() {}
 
@@ -79,8 +79,8 @@ public final class SReflection {
         SReflection.REMAPPER = Objects.requireNonNull(remapper);
     }
 
-    public static void setCondition(@NotNull Predicate<String> condition) {
-        SReflection.CONDITION = Objects.requireNonNull(condition);
+    public static void setActivePredicate(@NotNull Predicate<String> predicate) {
+        SReflection.ACTIVE_PREDICATE = Objects.requireNonNull(predicate);
     }
 
     @NotNull
@@ -94,8 +94,8 @@ public final class SReflection {
     }
 
     @NotNull
-    public static Predicate<String> getCustomCondition() {
-        return SReflection.CONDITION;
+    public static Predicate<String> getFilter() {
+        return SReflection.ACTIVE_PREDICATE;
     }
 
     @NotNull
