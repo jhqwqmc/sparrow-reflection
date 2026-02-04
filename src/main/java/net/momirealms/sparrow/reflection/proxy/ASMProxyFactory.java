@@ -6,10 +6,10 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Locale;
 
 public final class ASMProxyFactory implements Opcodes {
     private ASMProxyFactory() {
@@ -46,9 +46,10 @@ public final class ASMProxyFactory implements Opcodes {
             MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(targetClass, SReflection.LOOKUP);
             MethodHandles.Lookup hiddenLookup = lookup.defineHiddenClass(cw.toByteArray(), true, MethodHandles.Lookup.ClassOption.NESTMATE);
             Class<?> proxyClass = hiddenLookup.lookupClass();
-            for (FinalFieldHandle finalFieldHandle : builder.finalFields()) {
-                Field handleField = proxyClass.getDeclaredField("HANDLE_" + finalFieldHandle.name().toUpperCase(Locale.ROOT));
-                SReflection.setAccessible(handleField).set(null, finalFieldHandle.handle());
+            int i = 0;
+            for (MethodHandle finalFieldHandle : builder.finalFields()) {
+                Field handleField = proxyClass.getDeclaredField("HANDLE_" + i++);
+                SReflection.setAccessible(handleField).set(null, finalFieldHandle);
             }
             return (T) proxyClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

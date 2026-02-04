@@ -14,12 +14,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     private final ClassWriter cw;
     private final String internalName;
-    private final List<FinalFieldHandle> finalFields;
+    private final List<MethodHandle> finalFields;
+    private int count = 0;
 
     AsmProxyBuilder(ClassWriter classWriter, String internalName) {
         this.cw = classWriter;
@@ -27,8 +27,8 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         this.finalFields = new ArrayList<>(4);
     }
 
-    public List<FinalFieldHandle> finalFields() {
-        return finalFields;
+    public List<MethodHandle> finalFields() {
+        return this.finalFields;
     }
 
     @Override
@@ -128,7 +128,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     }
 
     private void writeFinalFieldSetter(Method method, Field field) {
-        String handleFieldName = "HANDLE_" + field.getName().toUpperCase(Locale.ROOT);
+        String handleFieldName = "HANDLE_" + this.count++;
         this.cw.visitField(ACC_PRIVATE | ACC_STATIC, handleFieldName, "Ljava/lang/invoke/MethodHandle;", null, null);
 
         MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC, method.getName(), Type.getMethodDescriptor(method), null, null);
@@ -175,7 +175,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         MethodHandle handle = SReflection.unreflectSetter(SReflection.setAccessible(field));
         assert handle != null;
         handle.asType(handle.type().changeParameterType(isStatic ? 0 : 1, method.getParameterTypes()[0]));
-        this.finalFields.add(new FinalFieldHandle(field.getName(), handle));
+        this.finalFields.add(handle);
     }
 
     @Override
