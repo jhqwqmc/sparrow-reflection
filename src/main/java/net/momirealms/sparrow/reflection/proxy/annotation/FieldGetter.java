@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FieldGetter {
 
-    String name() default "";
-
-    String[] names() default {};
+    String[] name();
 
     boolean isStatic() default false;
 

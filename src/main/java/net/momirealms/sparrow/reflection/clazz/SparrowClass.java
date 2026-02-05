@@ -44,6 +44,9 @@ public final class SparrowClass<T> {
 
     @Nullable
     public static Class<?> find(String... classes) {
+        if (classes.length == 1) {
+            return find(classes[0]);
+        }
         for (String className : classes) {
             Class<?> clazz = find(className);
             if (clazz != null) {
@@ -64,6 +67,9 @@ public final class SparrowClass<T> {
 
     @Nullable
     public static Class<?> findNoRemap(String... classes) {
+        if (classes.length == 1) {
+            return findNoRemap(classes[0]);
+        }
         for (String className : classes) {
             Class<?> clazz = findNoRemap(className);
             if (clazz != null) {

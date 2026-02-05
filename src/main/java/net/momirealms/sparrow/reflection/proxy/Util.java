@@ -47,23 +47,21 @@ final class Util {
     @SuppressWarnings("DuplicatedCode")
     @Nullable
     private static Class<?> getProxiedClass(Class<?> clazz, ReflectionProxy proxy) {
-        if (proxy.clazz() == Object.class && proxy.name().isEmpty() && proxy.names().length == 0) {
+        if (proxy.clazz() == Object.class && proxy.name().length == 0) {
             throw new IllegalArgumentException("ReflectionProxy doesn't have value or class name set for class " + clazz);
         }
         if (proxy.clazz() != Object.class) {
             return proxy.clazz();
         }
-        if (!proxy.name().isEmpty()) {
-            if (proxy.ignoreRelocation()) {
-                return SparrowClass.find(proxy.name().replace("{}", "."));
-            } else {
-                return SparrowClass.find(proxy.name());
-            }
-        }
         if (proxy.ignoreRelocation()) {
-            return SparrowClass.find(Arrays.stream(proxy.names()).map(it -> it.replace("{}", ".")).toArray(String[]::new));
+            String[] name = proxy.name();
+            if (name.length == 1) {
+                return SparrowClass.find(name[0].replace("{}", "."));
+            } else {
+                return SparrowClass.find(Arrays.stream(name).map(it -> it.replace("{}", ".")).toArray(String[]::new));
+            }
         } else {
-            return SparrowClass.find(proxy.names());
+            return SparrowClass.find(proxy.name());
         }
     }
 
@@ -80,33 +78,29 @@ final class Util {
         if (type == null) {
             return parameter.getType();
         }
-        if (type.clazz() == Object.class && type.name().isEmpty() && type.names().length == 0) {
+        if (type.clazz() == Object.class && type.name().length == 0) {
             throw new IllegalArgumentException("Type annotation doesn't have value or class name set for parameter " + parameter);
         }
         if (type.clazz() != Object.class) {
             return getProxiedClass(type.clazz());
         }
-        if (!type.name().isEmpty()) {
-            if (type.ignoreRelocation()) {
-                return SparrowClass.find(type.name().replace("{}", "."));
-            } else {
-                return SparrowClass.find(type.name());
-            }
-        }
         if (type.ignoreRelocation()) {
-            return SparrowClass.find(Arrays.stream(type.names()).map(it -> it.replace("{}", ".")).toArray(String[]::new));
+            String[] name = type.name();
+            if (name.length == 1) {
+                return SparrowClass.find(name[0].replace("{}", "."));
+            } else {
+                return SparrowClass.find(Arrays.stream(name).map(it -> it.replace("{}", ".")).toArray(String[]::new));
+            }
         } else {
-            return SparrowClass.find(type.names());
+            return SparrowClass.find(type.name());
         }
     }
 
     @SuppressWarnings("DuplicatedCode")
     public static FieldMatcher getFieldMatcher(FieldGetter fieldGetter) {
         FieldMatcher matcher;
-        if (!fieldGetter.name().isEmpty()) {
+        if (fieldGetter.name().length != 0) {
             matcher = FieldMatcher.named(fieldGetter.name());
-        } else if (fieldGetter.names().length != 0) {
-            matcher = FieldMatcher.named(fieldGetter.names());
         } else {
             throw new IllegalArgumentException("FieldGetter doesn't have name or names set");
         }
@@ -121,10 +115,8 @@ final class Util {
     @SuppressWarnings("DuplicatedCode")
     public static FieldMatcher getFieldMatcher(FieldSetter fieldSetter) {
         FieldMatcher matcher;
-        if (!fieldSetter.name().isEmpty()) {
+        if (fieldSetter.name().length != 0) {
             matcher = FieldMatcher.named(fieldSetter.name());
-        } else if (fieldSetter.names().length != 0) {
-            matcher = FieldMatcher.named(fieldSetter.names());
         } else {
             throw new IllegalArgumentException("FieldSetter doesn't have name or names set");
         }
@@ -138,10 +130,8 @@ final class Util {
 
     public static MethodMatcher createMethodMatcher(MethodInvoker invoker) {
         MethodMatcher matcher;
-        if (!invoker.name().isEmpty()) {
+        if (invoker.name().length != 0) {
             matcher = MethodMatcher.named(invoker.name());
-        } else if (invoker.names().length != 0) {
-            matcher = MethodMatcher.named(invoker.names());
         } else {
             throw new IllegalArgumentException("MethodInvoker doesn't have name or names set");
         }

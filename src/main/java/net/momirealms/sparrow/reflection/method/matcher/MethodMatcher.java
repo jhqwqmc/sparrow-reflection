@@ -45,10 +45,16 @@ public interface MethodMatcher {
     }
 
     static MethodMatcher named(String... names) {
+        if (names.length == 1) {
+            return named(names[0]);
+        }
         return new NamesMatcher(names, true);
     }
 
     static MethodMatcher namedNoRemap(String... names) {
+        if (names.length == 1) {
+            return namedNoRemap(names[0]);
+        }
         return new NamesMatcher(names, false);
     }
 

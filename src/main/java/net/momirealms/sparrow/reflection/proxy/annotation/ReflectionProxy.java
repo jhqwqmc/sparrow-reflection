@@ -11,9 +11,7 @@ public @interface ReflectionProxy {
 
     Class<?> clazz() default Object.class;
 
-    String name() default "";
-
-    String[] names() default {};
+    String[] name() default {};
 
     boolean ignoreRelocation() default false;
 
