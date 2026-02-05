@@ -221,7 +221,7 @@ The core feature of Sparrow Reflection is Reflection Proxy, which enables the ra
 >     }
 > 
 >     // Support different names for different versions
->     @ReflectionProxy(names = {"net.momirealms.sparrow.reflection.ServerLevel", "another.version.ServerLevel"})
+>     @ReflectionProxy(name = {"net.momirealms.sparrow.reflection.ServerLevel", "another.version.ServerLevel"})
 >     public interface ServerLevelProxy {
 > 
 >         // The activeIf option takes effect only after activePredicate is set
