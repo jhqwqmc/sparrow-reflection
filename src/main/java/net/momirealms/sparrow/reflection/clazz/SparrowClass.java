@@ -42,7 +42,6 @@ public final class SparrowClass<T> {
         return this.clazz.isInstance(object);
     }
 
-    @Nullable
     public static Class<?> find(String... classes) {
         if (classes.length == 1) {
             return find(classes[0]);
@@ -56,7 +55,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public static Class<?> find(String clazz) {
         try {
             return Class.forName(SReflection.getRemapper().remapClassName(clazz));
@@ -65,7 +63,6 @@ public final class SparrowClass<T> {
         }
     }
 
-    @Nullable
     public static Class<?> findNoRemap(String... classes) {
         if (classes.length == 1) {
             return findNoRemap(classes[0]);
@@ -79,7 +76,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public static Class<?> findNoRemap(String clazz) {
         try {
             return Class.forName(clazz);
@@ -112,7 +108,6 @@ public final class SparrowClass<T> {
 
      */
 
-    @Nullable
     public Field getField(FieldMatcher matcher) {
         for (Field field : this.clazz.getFields()) {
             if (matcher.matches(field)) {
@@ -122,7 +117,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Field getDeclaredField(FieldMatcher matcher) {
         for (Field field : this.clazz.getDeclaredFields()) {
             if (matcher.matches(field)) {
@@ -132,7 +126,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Field getField(FieldMatcher matcher, int index) {
         Field[] fields = this.clazz.getFields();
         int i = 0;
@@ -147,7 +140,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Field getDeclaredField(FieldMatcher matcher, int index) {
         Field[] fields = this.clazz.getDeclaredFields();
         int i = 0;
@@ -162,7 +154,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Field getFieldBackwards(FieldMatcher matcher, int index) {
         Field[] fields = this.clazz.getFields();
         int i = 0;
@@ -177,7 +168,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Field getDeclaredFieldBackwards(FieldMatcher matcher, int index) {
         Field[] fields = this.clazz.getDeclaredFields();
         int i = 0;
@@ -192,32 +182,26 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public SparrowField getSparrowField(FieldMatcher matcher) {
         return SparrowField.ofNullable(getField(matcher));
     }
 
-    @Nullable
     public SparrowField getDeclaredSparrowField(FieldMatcher matcher) {
         return SparrowField.ofNullable(getDeclaredField(matcher));
     }
 
-    @Nullable
     public SparrowField getSparrowField(FieldMatcher matcher, int index) {
         return SparrowField.ofNullable(getField(matcher, index));
     }
 
-    @Nullable
     public SparrowField getDeclaredSparrowField(FieldMatcher matcher, int index) {
         return SparrowField.ofNullable(getDeclaredField(matcher, index));
     }
 
-    @Nullable
     public SparrowField getSparrowFieldBackwards(FieldMatcher matcher, int index) {
         return SparrowField.ofNullable(getFieldBackwards(matcher, index));
     }
 
-    @Nullable
     public SparrowField getDeclaredSparrowFieldBackwards(FieldMatcher matcher, int index) {
         return SparrowField.ofNullable(getDeclaredFieldBackwards(matcher, index));
     }
@@ -228,12 +212,10 @@ public final class SparrowClass<T> {
 
      */
 
-    @NotNull
     public UnsafeConstructor unsafeConstructor() {
         return new UnsafeConstructor(this.clazz);
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
     public Constructor<T> getConstructor(ConstructorMatcher matcher) {
         for (Constructor<?> constructor : this.clazz.getConstructors()) {
@@ -244,7 +226,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
     public Constructor<T> getDeclaredConstructor(ConstructorMatcher matcher) {
         for (Constructor<?> constructor : this.clazz.getDeclaredConstructors()) {
@@ -255,7 +236,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
     public Constructor<T> getConstructor(ConstructorMatcher matcher, int index) {
         Constructor<?>[] constructors = this.clazz.getConstructors();
@@ -271,7 +251,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
     public Constructor<T> getDeclaredConstructor(ConstructorMatcher matcher, int index) {
         Constructor<?>[] constructors = this.clazz.getDeclaredConstructors();
@@ -287,7 +266,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
     public Constructor<T> getConstructorBackwards(ConstructorMatcher matcher, int index) {
         Constructor<?>[] constructors = this.clazz.getConstructors();
@@ -303,7 +281,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
     public Constructor<T> getDeclaredConstructorBackwards(ConstructorMatcher matcher, int index) {
         Constructor<?>[] constructors = this.clazz.getDeclaredConstructors();
@@ -319,32 +296,26 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public SparrowConstructor<T> getSparrowConstructor(ConstructorMatcher matcher) {
         return SparrowConstructor.ofNullable(getConstructor(matcher));
     }
 
-    @Nullable
     public SparrowConstructor<T> getDeclaredSparrowConstructor(ConstructorMatcher matcher) {
         return SparrowConstructor.ofNullable(getDeclaredConstructor(matcher));
     }
 
-    @Nullable
     public SparrowConstructor<T> getSparrowConstructor(ConstructorMatcher matcher, int index) {
         return SparrowConstructor.ofNullable(getConstructor(matcher, index));
     }
 
-    @Nullable
     public SparrowConstructor<T> getDeclaredSparrowConstructor(ConstructorMatcher matcher, int index) {
         return SparrowConstructor.ofNullable(getDeclaredConstructor(matcher, index));
     }
 
-    @Nullable
     public SparrowConstructor<T> getSparrowConstructorBackwards(ConstructorMatcher matcher, int index) {
         return SparrowConstructor.ofNullable(getConstructorBackwards(matcher, index));
     }
 
-    @Nullable
     public SparrowConstructor<T> getDeclaredSparrowConstructorBackwards(ConstructorMatcher matcher, int index) {
         return SparrowConstructor.ofNullable(getDeclaredConstructorBackwards(matcher, index));
     }
@@ -355,7 +326,6 @@ public final class SparrowClass<T> {
 
      */
 
-    @Nullable
     public Method getMethod(MethodMatcher matcher) {
         Method[] methods = this.clazz.getMethods();
         for (Method method : methods) {
@@ -366,7 +336,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Method getDeclaredMethod(MethodMatcher matcher) {
         Method[] methods = this.clazz.getDeclaredMethods();
         for (Method method : methods) {
@@ -377,7 +346,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Method getMethod(MethodMatcher matcher, int index) {
         Method[] methods = this.clazz.getMethods();
         int i = 0;
@@ -392,7 +360,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Method getDeclaredMethod(MethodMatcher matcher, int index) {
         Method[] methods = this.clazz.getDeclaredMethods();
         int i = 0;
@@ -407,7 +374,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Method getMethodBackwards(MethodMatcher matcher, int index) {
         Method[] methods = this.clazz.getMethods();
         int i = 0;
@@ -422,7 +388,6 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public Method getDeclaredMethodBackwards(MethodMatcher matcher, int index) {
         Method[] methods = this.clazz.getDeclaredMethods();
         int i = 0;
@@ -437,32 +402,26 @@ public final class SparrowClass<T> {
         return null;
     }
 
-    @Nullable
     public SparrowMethod getDeclaredSparrowMethod(MethodMatcher matcher) {
         return SparrowMethod.ofNullable(getDeclaredMethod(matcher));
     }
 
-    @Nullable
     public SparrowMethod getSparrowMethod(MethodMatcher matcher) {
         return SparrowMethod.ofNullable(getMethod(matcher));
     }
 
-    @Nullable
     public SparrowMethod getDeclaredSparrowMethod(MethodMatcher matcher, int index) {
         return SparrowMethod.ofNullable(getDeclaredMethod(matcher, index));
     }
 
-    @Nullable
     public SparrowMethod getSparrowMethod(MethodMatcher matcher, int index) {
         return SparrowMethod.ofNullable(getMethod(matcher, index));
     }
 
-    @Nullable
     public SparrowMethod getSparrowMethodBackwards(MethodMatcher matcher, int index) {
         return SparrowMethod.ofNullable(getMethodBackwards(matcher, index));
     }
 
-    @Nullable
     public SparrowMethod getDeclaredSparrowMethodBackwards(MethodMatcher matcher, int index) {
         return SparrowMethod.ofNullable(getDeclaredMethodBackwards(matcher, index));
     }
