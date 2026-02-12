@@ -72,8 +72,9 @@ public final class ASMUtils implements Opcodes {
                 mv.visitTypeInsn(CHECKCAST, "java/lang/Double");
                 mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
                 break;
-            case "V": // 理论上不应该有 void 字段
-                throw new IllegalArgumentException("Field cannot be of void type");
+            case "V":
+                // 如果 desc 是 void，不需要转换，直接返回即可
+                return;
             default:
                 // 对象类型
                 if (desc.startsWith("L")) {
