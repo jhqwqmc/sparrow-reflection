@@ -1,7 +1,7 @@
 package net.momirealms.sparrow.reflection.field;
 
 import net.momirealms.sparrow.reflection.SReflection;
-import net.momirealms.sparrow.reflection.util.AsmUtils;
+import net.momirealms.sparrow.reflection.util.ASMUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -50,7 +50,7 @@ final class FieldAccessorFactory implements Opcodes {
             mv.visitTypeInsn(CHECKCAST, ownerInternalName);
             mv.visitFieldInsn(GETFIELD, ownerInternalName, fieldName, fieldDescriptor);
         }
-        AsmUtils.box(mv, fieldDescriptor);
+        ASMUtils.box(mv, fieldDescriptor);
         mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
@@ -64,7 +64,7 @@ final class FieldAccessorFactory implements Opcodes {
             mv.visitTypeInsn(CHECKCAST, ownerInternalName);
             mv.visitVarInsn(ALOAD, 2);
         }
-        AsmUtils.unboxAndCast(mv, fieldDescriptor);
+        ASMUtils.unboxAndCast(mv, fieldDescriptor);
         mv.visitFieldInsn(isStatic ? PUTSTATIC : PUTFIELD, ownerInternalName, fieldName, fieldDescriptor);
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);

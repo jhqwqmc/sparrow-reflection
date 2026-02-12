@@ -1,7 +1,7 @@
 package net.momirealms.sparrow.reflection.method;
 
 import net.momirealms.sparrow.reflection.SReflection;
-import net.momirealms.sparrow.reflection.util.AsmUtils;
+import net.momirealms.sparrow.reflection.util.ASMUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -84,7 +84,7 @@ final class OptimizedMethodInvokerFactory implements Opcodes {
 
         for (int i = 0; i < params.length; i++) {
             mv.visitVarInsn(ALOAD, i + 2);
-            AsmUtils.unboxAndCast(mv, Type.getDescriptor(params[i]));
+            ASMUtils.unboxAndCast(mv, Type.getDescriptor(params[i]));
         }
 
         int opcode = isStatic ? INVOKESTATIC : (owner.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL);
@@ -93,7 +93,7 @@ final class OptimizedMethodInvokerFactory implements Opcodes {
         if (returnType == void.class) {
             mv.visitInsn(ACONST_NULL);
         } else {
-            AsmUtils.box(mv, Type.getDescriptor(returnType));
+            ASMUtils.box(mv, Type.getDescriptor(returnType));
         }
 
         mv.visitInsn(ARETURN);

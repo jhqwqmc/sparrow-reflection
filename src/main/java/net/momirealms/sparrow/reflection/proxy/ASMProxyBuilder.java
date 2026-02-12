@@ -1,7 +1,7 @@
 package net.momirealms.sparrow.reflection.proxy;
 
 import net.momirealms.sparrow.reflection.SReflection;
-import net.momirealms.sparrow.reflection.util.AsmUtils;
+import net.momirealms.sparrow.reflection.util.ASMUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -17,14 +17,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
+final class ASMProxyBuilder implements ProxyBuilder, Opcodes {
     private final Set<String> writtenSignatures = new HashSet<>();
     private final ClassWriter cw;
     private final String internalName;
     private final List<MethodHandle> finalFields;
     private int count = 0;
 
-    AsmProxyBuilder(ClassWriter classWriter, String internalName) {
+    ASMProxyBuilder(ClassWriter classWriter, String internalName) {
         this.cw = classWriter;
         this.internalName = internalName;
         this.finalFields = new ArrayList<>(4);
@@ -41,6 +41,8 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
 
     @Override
     public void writeFieldGetter(Method method, Field field) {
+        if (checkDuplicate(method)) return;
+
         MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC, method.getName(), Type.getMethodDescriptor(method), null, null);
         mv.visitCode();
 
@@ -70,7 +72,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
             }
         } else {
             if (fieldType.isPrimitive()) {
-                AsmUtils.box(mv, fieldDescriptor);
+                ASMUtils.box(mv, fieldDescriptor);
             } else {
                 mv.visitTypeInsn(CHECKCAST, Type.getInternalName(returnType));
             }
@@ -84,6 +86,8 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
 
     @Override
     public void writeFieldSetter(Method method, Field field) {
+        if (checkDuplicate(method)) return;
+
         if (Modifier.isFinal(field.getModifiers())) {
             writeFinalFieldSetter(method, field);
             return;
@@ -109,7 +113,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
 
         if (fieldType.isPrimitive()) {
             if (!proxyParamType.isPrimitive()) {
-                AsmUtils.unboxAndCast(mv, fieldDescriptor);
+                ASMUtils.unboxAndCast(mv, fieldDescriptor);
             } else if (proxyParamType != field.getType()) {
                 throw new IllegalArgumentException(String.format(
                         "Primitive type mismatch in method '%s': cannot pass '%s' to field '%s' of type '%s' without explicit conversion",
@@ -158,7 +162,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         String fieldDescriptor = Type.getDescriptor(field.getType());
         if (field.getType().isPrimitive()) {
             if (!proxyParamType.isPrimitive()) {
-                AsmUtils.unboxAndCast(mv, fieldDescriptor);
+                ASMUtils.unboxAndCast(mv, fieldDescriptor);
             } else if (proxyParamType != field.getType()) {
                 throw new IllegalArgumentException(String.format(
                         "Primitive type mismatch in method '%s': cannot pass '%s' to field '%s' of type '%s' without explicit conversion",
@@ -189,6 +193,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
     @Override
     public void writeMethod(Method proxyMethod, Method targetMethod) {
         if (checkDuplicate(proxyMethod)) return;
+
         MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC, proxyMethod.getName(), Type.getMethodDescriptor(proxyMethod), null, null);
         mv.visitCode();
 
@@ -244,7 +249,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         if (targetRet.isPrimitive()) {
             if (!proxyRet.isPrimitive()) {
                 // 基本 -> 包装 (装箱)
-                AsmUtils.box(mv, Type.getDescriptor(targetRet));
+                ASMUtils.box(mv, Type.getDescriptor(targetRet));
                 mv.visitInsn(ARETURN);
             } else {
                 // 基本 -> 基本
@@ -257,7 +262,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
         else {
             if (proxyRet.isPrimitive()) {
                 // 对象 -> 基本 (拆箱)
-                AsmUtils.unboxAndCast(mv, Type.getDescriptor(proxyRet));
+                ASMUtils.unboxAndCast(mv, Type.getDescriptor(proxyRet));
                 mv.visitInsn(Type.getType(proxyRet).getOpcode(IRETURN));
             } else {
                 // 对象 -> 对象
@@ -271,6 +276,8 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
 
     @Override
     public void writeConstructor(Method method, Constructor<?> constructor) {
+        if (checkDuplicate(method)) return;
+
         MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC, method.getName(), Type.getMethodDescriptor(method), null, null);
         mv.visitCode();
 

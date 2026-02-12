@@ -3,8 +3,8 @@ package net.momirealms.sparrow.reflection.util;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public final class AsmUtils implements Opcodes {
-    private AsmUtils() {}
+public final class ASMUtils implements Opcodes {
+    private ASMUtils() {}
 
     public static void box(MethodVisitor mv, String desc) {
         switch (desc) {

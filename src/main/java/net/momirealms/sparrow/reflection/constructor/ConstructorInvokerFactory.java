@@ -1,7 +1,7 @@
 package net.momirealms.sparrow.reflection.constructor;
 
 import net.momirealms.sparrow.reflection.SReflection;
-import net.momirealms.sparrow.reflection.util.AsmUtils;
+import net.momirealms.sparrow.reflection.util.ASMUtils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -48,9 +48,9 @@ final class ConstructorInvokerFactory implements Opcodes {
 
         for (int i = 0; i < params.length; i++) {
             mv.visitVarInsn(ALOAD, 1);
-            AsmUtils.pushInt(mv, i);
+            ASMUtils.pushInt(mv, i);
             mv.visitInsn(AALOAD);
-            AsmUtils.unboxAndCast(mv, Type.getDescriptor(params[i]));
+            ASMUtils.unboxAndCast(mv, Type.getDescriptor(params[i]));
         }
 
         mv.visitMethodInsn(INVOKESPECIAL, ownerInternalName, "<init>", descriptor, false);

@@ -41,7 +41,7 @@ final class Util implements Opcodes {
         }
 
         // 写入接口方法
-        AsmProxyBuilder builder = new AsmProxyBuilder(cw, internalClassName);
+        ASMProxyBuilder builder = new ASMProxyBuilder(cw, internalClassName);
         Util.analyseAndApply(builder, interfaces);
 
         // 完成类
