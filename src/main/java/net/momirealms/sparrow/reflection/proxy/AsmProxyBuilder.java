@@ -13,9 +13,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
+    private final Set<String> writtenSignatures = new HashSet<>();
     private final ClassWriter cw;
     private final String internalName;
     private final List<MethodHandle> finalFields;
@@ -29,6 +32,11 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
 
     public List<MethodHandle> finalFields() {
         return this.finalFields;
+    }
+
+    private boolean checkDuplicate(Method method) {
+        String sig = method.getName() + Type.getMethodDescriptor(method);
+        return !this.writtenSignatures.add(sig);
     }
 
     @Override
@@ -180,6 +188,7 @@ final class AsmProxyBuilder implements ProxyBuilder, Opcodes {
 
     @Override
     public void writeMethod(Method proxyMethod, Method targetMethod) {
+        if (checkDuplicate(proxyMethod)) return;
         MethodVisitor mv = this.cw.visitMethod(ACC_PUBLIC, proxyMethod.getName(), Type.getMethodDescriptor(proxyMethod), null, null);
         mv.visitCode();
 

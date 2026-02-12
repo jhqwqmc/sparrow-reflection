@@ -8,27 +8,112 @@ import net.momirealms.sparrow.reflection.method.matcher.MethodMatcher;
 import net.momirealms.sparrow.reflection.proxy.annotation.*;
 import net.momirealms.sparrow.reflection.proxy.annotation.Type;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.*;
 
-final class Util {
+final class Util implements Opcodes {
     private Util() {}
 
-    public static List<Class<?>> getTopDownInterfaceHierarchy(Class<?> interfaceClass) {
-        Set<Class<?>> hierarchy = new LinkedHashSet<>();
-        hierarchy.add(interfaceClass);
-        collectInterfaces(interfaceClass, hierarchy);
-        // 父接口在前，子接口在后
-        List<Class<?>> result = new ArrayList<>(hierarchy);
-        Collections.reverse(result);
+    @SuppressWarnings("unchecked")
+    public static <T> T createAsmProxy(final Class<T> proxy) {
+        List<Class<?>> interfaces = Util.getChildFirstHierarchy(proxy);
+        Class<?> targetClass = Util.getProxiedClass(proxy);
+        if (targetClass == null) return null;
+        String internalClassName = org.objectweb.asm.Type.getInternalName(targetClass) + "$Proxy";
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        cw.visit(V17, ACC_PUBLIC | ACC_FINAL, internalClassName, null, "java/lang/Object", new String[]{org.objectweb.asm.Type.getInternalName(proxy)});
+
+        // 添加构造方法
+        {
+            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            mv.visitInsn(RETURN);
+            mv.visitMaxs(1, 1);
+            mv.visitEnd();
+        }
+
+        // 写入接口方法
+        AsmProxyBuilder builder = new AsmProxyBuilder(cw, internalClassName);
+        Util.analyseAndApply(builder, interfaces);
+
+        // 完成类
+        cw.visitEnd();
+
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(targetClass, SReflection.LOOKUP);
+            MethodHandles.Lookup hiddenLookup = lookup.defineHiddenClass(cw.toByteArray(), true, MethodHandles.Lookup.ClassOption.NESTMATE);
+            Class<?> proxyClass = hiddenLookup.lookupClass();
+            int i = 0;
+            for (MethodHandle finalFieldHandle : builder.finalFields()) {
+                Field handleField = proxyClass.getDeclaredField("HANDLE_" + i++);
+                SReflection.setAccessible(handleField).set(null, finalFieldHandle);
+            }
+            return (T) proxyClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create proxy class " + proxy, e);
+        }
+    }
+
+    public static List<Class<?>> getChildFirstHierarchy(Class<?> interfaceClass) {
+        Objects.requireNonNull(interfaceClass, "Interface class must not be null");
+        if (!interfaceClass.isInterface()) {
+            throw new IllegalArgumentException("Class must be an interface: " + interfaceClass);
+        }
+
+        Set<Class<?>> allInterfaces = new HashSet<>(8);
+        collectInterfaces(interfaceClass, allInterfaces);
+
+        Map<Class<?>, Integer> inDegree = new HashMap<>(8);
+        Map<Class<?>, List<Class<?>>> parentsMap = new HashMap<>(8);
+
+        for (Class<?> clazz : allInterfaces) {
+            inDegree.putIfAbsent(clazz, 0);
+
+            Class<?>[] parents = clazz.getInterfaces();
+            for (Class<?> parent : parents) {
+                inDegree.put(parent, inDegree.getOrDefault(parent, 0) + 1);
+                parentsMap.computeIfAbsent(clazz, k -> new ArrayList<>()).add(parent);
+            }
+        }
+
+        Queue<Class<?>> queue = new LinkedList<>();
+        inDegree.forEach((clazz, degree) -> {
+            if (degree == 0) queue.offer(clazz);
+        });
+
+        List<Class<?>> result = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            Class<?> current = queue.poll();
+            result.add(current);
+
+            List<Class<?>> parents = parentsMap.get(current);
+            if (parents != null) {
+                for (Class<?> parent : parents) {
+                    int remainingDegree = inDegree.get(parent) - 1;
+                    inDegree.put(parent, remainingDegree);
+                    if (remainingDegree == 0) {
+                        queue.offer(parent);
+                    }
+                }
+            }
+        }
+
         return Collections.unmodifiableList(result);
     }
 
-    private static void collectInterfaces(Class<?> clazz, Set<Class<?>> collector) {
-        for (Class<?> parent : clazz.getInterfaces()) {
-            collector.add(parent);
-            collectInterfaces(parent, collector);
+    private static void collectInterfaces(Class<?> clazz, Set<Class<?>> visited) {
+        if (visited.add(clazz)) {
+            for (Class<?> parent : clazz.getInterfaces()) {
+                collectInterfaces(parent, visited);
+            }
         }
     }
 
