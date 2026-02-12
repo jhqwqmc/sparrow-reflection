@@ -172,7 +172,7 @@ The core feature of Sparrow Reflection is Reflection Proxy, which enables the ra
 > public class ProxyExample {
 > 
 >     public static void main(String[] args) {
->         // Assume an existing object exists
+>         // Assume an existing object
 >         ServerLevel serverLevel = new ServerLevel(666);
 >         // Create ServerLevelProxy
 >         ServerLevelProxy serverLevelProxy = ASMProxyFactory.create(ServerLevelProxy.class);
