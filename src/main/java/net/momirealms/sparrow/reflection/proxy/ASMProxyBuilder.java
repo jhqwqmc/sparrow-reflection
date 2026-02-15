@@ -184,9 +184,7 @@ final class ASMProxyBuilder implements ProxyBuilder, Opcodes {
         mv.visitMaxs(0, 0);
         mv.visitEnd();
 
-        MethodHandle handle = SReflection.unreflectSetter(SReflection.setAccessible(field));
-        assert handle != null;
-        handle.asType(handle.type().changeParameterType(isStatic ? 0 : 1, method.getParameterTypes()[0]));
+        MethodHandle handle = SReflection.unreflectSetter(field);
         this.finalFields.add(handle);
     }
 
