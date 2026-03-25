@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "net.momirealms"
-version = "0.25"
+version = "0.26"
 
 dependencies {
     compileOnly("org.ow2.asm:asm:9.9.1")
@@ -48,11 +48,11 @@ tasks {
 publishing {
     repositories {
         maven {
-            name = "releases"
+            name = "XiaoMoMi"
             url = uri("https://repo.momirealms.net/releases")
-            credentials(PasswordCredentials::class) {
-                username = System.getenv("REPO_USERNAME")
-                password = System.getenv("REPO_PASSWORD")
+            credentials(PasswordCredentials::class)
+            authentication {
+                create<BasicAuthentication>("basic")
             }
         }
     }
