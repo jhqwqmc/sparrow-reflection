@@ -15,6 +15,7 @@ version = "0.25"
 dependencies {
     compileOnly("org.ow2.asm:asm:9.9.1")
     compileOnly("org.jetbrains:annotations:26.0.2-1")
+    compileOnly("com.google.code.gson:gson:2.13.2")
     implementation("net.fabricmc:mapping-io:0.8.0")
 }
 

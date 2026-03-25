@@ -1,10 +1,13 @@
 package net.momirealms.sparrow.reflection.remapper;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.momirealms.sparrow.reflection.clazz.SparrowClass;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -41,6 +44,15 @@ public interface Remapper {
         if (minecraftClass == null) {
             return noOp();
         }
+        // no obf version
+        try (InputStream is = minecraftClass.getClassLoader().getResourceAsStream("version.json")) {
+            if (is != null) {
+                JsonObject json = new Gson().fromJson(new String(is.readAllBytes(), StandardCharsets.UTF_8), JsonObject.class);
+                if (json.get("world_version").getAsInt() >= 4764) {
+                    return noOp();
+                }
+            }
+        } catch (Throwable ignored) {} // ignore any errors
         try (InputStream is = minecraftClass.getClassLoader().getResourceAsStream("META-INF/mappings/reobf.tiny")) {
             if (is == null) {
                 throw new IllegalStateException("Failed to find META-INF/mappings/reobf.tiny");
