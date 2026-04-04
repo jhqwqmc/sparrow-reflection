@@ -118,6 +118,13 @@ final class Util implements Opcodes {
     }
 
     public static Class<?> getProxiedClass(Class<?> clazz) {
+        if (clazz.isArray()) {
+            Class<?> componentType = clazz.getComponentType();
+            Class<?> proxiedComponent = getProxiedClass(componentType);
+            if (proxiedComponent == null) return null;
+            return Array.newInstance(proxiedComponent, 0).getClass();
+        }
+
         ReflectionProxy proxy = clazz.getDeclaredAnnotation(ReflectionProxy.class);
         if (proxy == null) {
             throw new IllegalArgumentException("Class " + clazz + " has no @ReflectionProxy annotation");
