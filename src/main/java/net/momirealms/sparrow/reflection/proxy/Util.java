@@ -22,6 +22,7 @@ final class Util implements Opcodes {
 
     @SuppressWarnings("unchecked")
     public static <T> T createAsmProxy(final Class<T> proxy) {
+        ClassLoader classLoader = proxy.getClassLoader();
         List<Class<?>> interfaces = Util.getChildFirstHierarchy(proxy);
         Class<?> targetClass = Util.getProxiedClass(proxy);
         if (targetClass == null) return null;
@@ -130,7 +131,7 @@ final class Util implements Opcodes {
             throw new IllegalArgumentException("Class " + clazz + " has no @ReflectionProxy annotation");
         }
         if (SReflection.getFilter().test(proxy.activeIf())) {
-            Class<?> proxiedClass = getProxiedClass(clazz, proxy);
+            Class<?> proxiedClass = getProxiedClass(clazz, proxy, clazz.getClassLoader());
             if (proxy.nullable()) {
                 return proxiedClass;
             }
@@ -142,7 +143,7 @@ final class Util implements Opcodes {
 
     @SuppressWarnings("DuplicatedCode")
     @Nullable
-    private static Class<?> getProxiedClass(Class<?> clazz, ReflectionProxy proxy) {
+    private static Class<?> getProxiedClass(Class<?> clazz, ReflectionProxy proxy, ClassLoader classLoader) {
         if (proxy.clazz() == Object.class && proxy.name().length == 0) {
             throw new IllegalArgumentException("ReflectionProxy doesn't have value or class name set for class " + clazz);
         }
@@ -152,12 +153,12 @@ final class Util implements Opcodes {
         if (proxy.ignoreRelocation()) {
             String[] name = proxy.name();
             if (name.length == 1) {
-                return SparrowClass.find(name[0].replace("{}", "."));
+                return SparrowClass.find(false, classLoader, name[0].replace("{}", "."));
             } else {
-                return SparrowClass.find(Arrays.stream(name).map(it -> it.replace("{}", ".")).toArray(String[]::new));
+                return SparrowClass.find(false, classLoader, Arrays.stream(name).map(it -> it.replace("{}", ".")).toArray(String[]::new));
             }
         } else {
-            return SparrowClass.find(proxy.name());
+            return SparrowClass.find(false, classLoader, proxy.name());
         }
     }
 
@@ -169,7 +170,7 @@ final class Util implements Opcodes {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    public static Class<?> getParameterClass(Parameter parameter) {
+    public static Class<?> getParameterClass(Parameter parameter, ClassLoader classLoader) {
         Type type = parameter.getDeclaredAnnotation(Type.class);
         if (type == null) {
             return parameter.getType();
@@ -183,12 +184,12 @@ final class Util implements Opcodes {
         if (type.ignoreRelocation()) {
             String[] name = type.name();
             if (name.length == 1) {
-                return SparrowClass.find(name[0].replace("{}", "."));
+                return SparrowClass.find(false, classLoader, name[0].replace("{}", "."));
             } else {
-                return SparrowClass.find(Arrays.stream(name).map(it -> it.replace("{}", ".")).toArray(String[]::new));
+                return SparrowClass.find(false, classLoader, Arrays.stream(name).map(it -> it.replace("{}", ".")).toArray(String[]::new));
             }
         } else {
-            return SparrowClass.find(type.name());
+            return SparrowClass.find(false, classLoader, type.name());
         }
     }
 
@@ -280,7 +281,7 @@ final class Util implements Opcodes {
             if (methodInvoker != null && SReflection.getFilter().test(methodInvoker.activeIf())) {
                 Class<?>[] parameterTypes = Arrays.stream(method.getParameters())
                         .skip(methodInvoker.isStatic() ? 0 : 1)
-                        .map(Util::getParameterClass)
+                        .map(p -> Util.getParameterClass(p, proxyClass.getClassLoader()))
                         .toArray(Class<?>[]::new);
                 // 方法只需要 参数 + 名称，即可确定唯一方法
                 Method targetMethod = spaClass.getDeclaredMethod(Util.createMethodMatcher(methodInvoker).and(MethodMatcher.takeArguments(parameterTypes)));
@@ -299,7 +300,7 @@ final class Util implements Opcodes {
             if (constructorInvoker != null && SReflection.getFilter().test(constructorInvoker.activeIf())) {
                 // 构造器只需要 参数 即可确定
                 Class<?>[] parameterTypes = Arrays.stream(method.getParameters())
-                        .map(Util::getParameterClass)
+                        .map(p -> Util.getParameterClass(p, proxyClass.getClassLoader()))
                         .toArray(Class<?>[]::new);
                 Constructor<?> constructor = spaClass.getDeclaredConstructor(ConstructorMatcher.takeArguments(parameterTypes));
                 Objects.requireNonNull(constructor, "Constructor not found for proxy " + proxyClass + "#" + method.getName());

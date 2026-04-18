@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("com.gradleup.shadow") version "9.3.1"
+    id("com.gradleup.shadow") version "9.4.1"
     id("maven-publish")
 }
 
@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "net.momirealms"
-version = "0.27"
+version = "0.27.3"
 
 dependencies {
     compileOnly("org.ow2.asm:asm:9.9.1")

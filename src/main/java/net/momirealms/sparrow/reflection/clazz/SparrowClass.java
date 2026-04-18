@@ -55,9 +55,30 @@ public final class SparrowClass<T> {
         return null;
     }
 
+    public static Class<?> find(boolean load, ClassLoader classLoader, String... classes) {
+        if (classes.length == 1) {
+            return find(load, classLoader, classes[0]);
+        }
+        for (String className : classes) {
+            Class<?> clazz = find(load, classLoader, className);
+            if (clazz != null) {
+                return clazz;
+            }
+        }
+        return null;
+    }
+
     public static Class<?> find(String clazz) {
         try {
             return Class.forName(SReflection.getRemapper().remapClassName(clazz));
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static Class<?> find(boolean load, ClassLoader classLoader, String clazz) {
+        try {
+            return Class.forName(SReflection.getRemapper().remapClassName(clazz), load, classLoader);
         } catch (ClassNotFoundException e) {
             return null;
         }
