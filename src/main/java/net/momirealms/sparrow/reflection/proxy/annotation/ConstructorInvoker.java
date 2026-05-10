@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface ConstructorInvoker {
 
     String activeIf() default "";
+
+    boolean optional() default false;
 }

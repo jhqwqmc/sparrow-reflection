@@ -260,9 +260,13 @@ final class Util implements Opcodes {
             if (fieldGetter != null && SReflection.getFilter().test(fieldGetter.activeIf())) {
                 // 字段只需 名称 即可确定
                 Field field = spaClass.getDeclaredField(Util.getFieldMatcher(fieldGetter));
-                Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
-                Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 0 : 1);
-                builder.writeFieldGetter(method, field);
+                if (!fieldGetter.optional()) {
+                    Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
+                }
+                if (field != null) {
+                    Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 0 : 1);
+                    builder.writeFieldGetter(method, field);
+                }
                 continue;
             }
 
@@ -270,9 +274,13 @@ final class Util implements Opcodes {
             FieldSetter fieldSetter = method.getAnnotation(FieldSetter.class);
             if (fieldSetter != null && SReflection.getFilter().test(fieldSetter.activeIf())) {
                 Field field = spaClass.getDeclaredField(Util.getFieldMatcher(fieldSetter));
-                Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
-                Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 1 : 2);
-                builder.writeFieldSetter(method, field);
+                if (fieldSetter.optional()) {
+                    Objects.requireNonNull(field, "Field not found for proxy " + proxyClass + "#" + method.getName());
+                }
+                if (field != null) {
+                    Util.checkArgumentCount(method, Modifier.isStatic(field.getModifiers()) ? 1 : 2);
+                    builder.writeFieldSetter(method, field);
+                }
                 continue;
             }
 
@@ -285,13 +293,17 @@ final class Util implements Opcodes {
                         .toArray(Class<?>[]::new);
                 // 方法只需要 参数 + 名称，即可确定唯一方法
                 Method targetMethod = spaClass.getDeclaredMethod(Util.createMethodMatcher(methodInvoker).and(MethodMatcher.takeArguments(parameterTypes)));
-                Objects.requireNonNull(targetMethod, "Method not found for proxy " + proxyClass + "#" + method.getName());
-                if (!Modifier.isStatic(targetMethod.getModifiers())) {
-                    if (method.getParameterCount() < 1) {
-                        throw new IllegalArgumentException("Non-static method must have at least one argument");
-                    }
+                if (!methodInvoker.optional()) {
+                    Objects.requireNonNull(targetMethod, "Method not found for proxy " + proxyClass + "#" + method.getName());
                 }
-                builder.writeMethod(method, targetMethod);
+                if (targetMethod != null) {
+                    if (!Modifier.isStatic(targetMethod.getModifiers())) {
+                        if (method.getParameterCount() < 1) {
+                            throw new IllegalArgumentException("Non-static method must have at least one argument");
+                        }
+                    }
+                    builder.writeMethod(method, targetMethod);
+                }
                 continue;
             }
 
@@ -303,8 +315,12 @@ final class Util implements Opcodes {
                         .map(p -> Util.getParameterClass(p, proxyClass.getClassLoader()))
                         .toArray(Class<?>[]::new);
                 Constructor<?> constructor = spaClass.getDeclaredConstructor(ConstructorMatcher.takeArguments(parameterTypes));
-                Objects.requireNonNull(constructor, "Constructor not found for proxy " + proxyClass + "#" + method.getName());
-                builder.writeConstructor(method, constructor);
+                if (!constructorInvoker.optional()) {
+                    Objects.requireNonNull(constructor, "Constructor not found for proxy " + proxyClass + "#" + method.getName());
+                }
+                if (constructor != null) {
+                    builder.writeConstructor(method, constructor);
+                }
                 continue;
             }
         }

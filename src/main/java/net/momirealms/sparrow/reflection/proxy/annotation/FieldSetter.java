@@ -14,4 +14,6 @@ public @interface FieldSetter {
     boolean isStatic() default false;
 
     String activeIf() default "";
+
+    boolean optional() default false;
 }
