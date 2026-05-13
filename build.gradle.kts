@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "net.momirealms"
-version = "0.30"
+version = "0.31"
 
 dependencies {
     compileOnly("org.ow2.asm:asm:9.9.1")
@@ -20,6 +20,8 @@ dependencies {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }

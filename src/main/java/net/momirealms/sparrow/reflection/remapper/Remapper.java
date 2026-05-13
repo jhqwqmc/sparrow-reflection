@@ -55,7 +55,7 @@ public interface Remapper {
         } catch (Throwable ignored) {} // ignore any errors
         try (InputStream is = minecraftClass.getClassLoader().getResourceAsStream("META-INF/mappings/reobf.tiny")) {
             if (is == null) {
-                throw new IllegalStateException("Failed to find META-INF/mappings/reobf.tiny");
+                return noOp(); // mojmap version
             }
             InputStream bis = is instanceof BufferedInputStream ? is : new BufferedInputStream(is);
             if (Util.firstLine(bis).contains(MappingNamespaces.MOJANG_PLUS_YARN)) {
