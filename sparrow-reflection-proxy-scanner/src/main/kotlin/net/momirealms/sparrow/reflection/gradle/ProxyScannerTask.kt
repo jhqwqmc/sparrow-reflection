@@ -4,11 +4,14 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
+import org.gradle.work.DisableCachingByDefault
 import org.objectweb.asm.*
 
+@DisableCachingByDefault
 abstract class ProxyScannerTask : DefaultTask() {
 
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val classesDirs: ConfigurableFileCollection
 
     @get:OutputFile

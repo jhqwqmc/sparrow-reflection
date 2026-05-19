@@ -3,7 +3,6 @@ package net.momirealms.sparrow.reflection.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSetContainer
-import kotlin.text.set
 
 class SparrowProxyPlugin : Plugin<Project> {
 
